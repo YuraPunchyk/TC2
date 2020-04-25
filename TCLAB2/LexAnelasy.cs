@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace TCLAB2 {
 	class LexAnelasy {
@@ -9,23 +7,21 @@ namespace TCLAB2 {
 		public char Lexema { get; set; }
 		public string LexemText { get; set; } = "";
 		public int Bail { get; set; }
+		public string Inden { get; set; }
 
 		public LexAnelasy ( string[] lines ) {
 			Lines = lines;
 		}
-
-		public const string Inden = "idpo453";
 		public const string Operation = "+*";
 		public const string Math = "=()";
+		public const string IndenConst = "id4op35";
 		public void GetToken ( string line ) {
 			Lexema = line[Pos++];
-			if(Inden.Contains(Lexema)) {
-				LexemText += $"{{{Lexema}, Inden}}\n";
-			} else if(Operation.Contains(Lexema)) {
+			if(Operation.Contains(Lexema)) {
 				LexemText += $"{{{Lexema}, Operation}}\n";
 			} else if(Math.Contains(Lexema)) {
 				LexemText += $"{{{Lexema}, Math}}\n";
-			} else {
+			} else if (!IndenConst.Contains(Lexema)){
 				LexemText += $"{{{Lexema}, NotDefined}}\n";
 			}
 		}
@@ -40,7 +36,7 @@ namespace TCLAB2 {
 				Bail = 0;
 				try {
 					ok = Start(Lines[i]);
-					if(ok&&Bail==1) {
+					if(ok && Bail == 1) {
 						text += Lines[i] + "\n";
 					} else {
 						Console.WriteLine($"Lexical exception in {i} row, {Pos} position");
@@ -66,6 +62,7 @@ namespace TCLAB2 {
 			GetToken(line);
 			if(Lexema != 'r') {
 				if(P(line)) {
+					LexemText += $"{{{Inden}, Inden}}\n";
 					if(Lexema == '=') {
 						return E(line);
 					} else {
@@ -105,32 +102,18 @@ namespace TCLAB2 {
 		}
 
 		public bool P ( string line ) {
-			string consanent = "idop";
-			string number = "435";
-			string consts = "+*=)";
-			bool check = false;
-			
-			while(true) {
-				if(consanent.Contains(Lexema)) {
-					check = true;
-				} else if(check) {
-					while(number.Contains(Lexema)) {
-						if(Pos == line.Length) {
-							Bail = 1;
-							return true;
-						}
-						GetToken(line);
-					}
-					if(consts.Contains(Lexema) || Pos > line.Length) {
-						return true;
-					} else {
-						return false;
-					}
-				} else {
-					return false;
-				}
-				GetToken(line);
+			string Ind1consanent = "id";
+			string Ind1number = "4";
+			string Ind2consanet = "op";
+			string Ind2number = "35";
+			if(Ind1consanent.Contains(Lexema)) {
+				return ChechInden(line, Ind1consanent, Ind1number);
+			} else if(Ind2consanet.Contains(Lexema)) {
+				return ChechInden(line, Ind2consanet, Ind2number);
+			} else {
+				return false;
 			}
+
 		}
 
 		public bool E ( string line ) {
@@ -166,6 +149,9 @@ namespace TCLAB2 {
 					GetToken(line);
 				}
 				ok = P(line);
+				if(ok) {
+					LexemText += $"{{{Inden}, Inden}}\n";
+				}
 			} else {
 				Bail++;
 				GetToken(line);
@@ -180,6 +166,34 @@ namespace TCLAB2 {
 			}
 			return ok;
 		}
+		public bool ChechInden ( string line, string consanents, string numbers ) {
+			string consts = "+*=)";
+			bool check = false;
+			Inden = "";
+			while(true) {
+				if(consanents.Contains(Lexema)) {
+					check = true;
+					Inden += Lexema.ToString();
+				} else if(check) {
+					while(numbers.Contains(Lexema)) {
+						Inden += Lexema.ToString();
+						if(Pos == line.Length) {
+							Bail = 1;
+							return true;
+						}
+						GetToken(line);
+					}
+					if(consts.Contains(Lexema) || Pos > line.Length) {
+						return true;
+					} else {
+						return false;
+					}
+				} else {
+					return false;
+				}
+				GetToken(line);
+			}
 
+		}
 	}
 }
